@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Search, Heart, Clock, Truck, ShieldCheck, CheckCircle, Navigation, Building, Plus, RefreshCw, AlertTriangle } from 'lucide-react';
+import { MapPin, Search, Heart, Clock, Truck, RefreshCw } from 'lucide-react';
 import { api } from '../api';
 import ErrorState from '../components/ErrorState';
 import { useAuth } from '../context/AuthContext';
@@ -13,7 +13,7 @@ export default function NgoDashboard() {
 
   // Geospatial Search Filters
   const [useGeoSearch, setUseGeoSearch] = useState(true);
-  const [lat, setLat] = useState(18.5204); // Default Pune center (Swargate/Shivajinagar)
+  const [lat, setLat] = useState(18.5204); // Default Pune center
   const [lng, setLng] = useState(73.8567);
   const [distanceKm, setDistanceKm] = useState(10); // 10 km radius
 
@@ -27,7 +27,6 @@ export default function NgoDashboard() {
     try {
       let data;
       if (useGeoSearch) {
-        // Query 6: GEOSPATIAL QUERY ($nearSphere with 2dsphere index)
         const distanceMeters = distanceKm * 1000;
         data = await api.getNearbyDonations(lat, lng, distanceMeters);
       } else {
@@ -82,35 +81,56 @@ export default function NgoDashboard() {
     }
   };
 
+  const getPriorityBadge = (priority) => {
+    switch (priority) {
+      case 'NORMAL':
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#E5EEDD] text-[#3D572C] border border-[#C6D8B8]">Normal</span>;
+      case 'HIGH':
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#F9EED9] text-[#8A5816] border border-[#E8D1A7]">High</span>;
+      case 'URGENT':
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#F8E7E3] text-[#963826] border border-[#E8C1B7]">Urgent</span>;
+      case 'CRITICAL':
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#F4E5E4] text-[#842E28] border border-[#DCBDBB]">Critical</span>;
+      default:
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#F5EEDB] text-[#6B5E52] border border-[#E3D9C8]">{priority || 'Available'}</span>;
+    }
+  };
+
   return (
-    <div className="space-y-6 py-4">
+    <div className="space-y-6 py-4" data-testid="ngo-dashboard">
       
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2 border-b border-[#E3D9C8]">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Heart className="w-6 h-6 text-teal-400" />
-            <span>NGO Portal & Geospatial Food Search</span>
+          <h1 className="text-2xl font-normal font-heading text-[#2B2118] tracking-wide flex items-center gap-2" data-testid="ngo-portal-heading">
+            <Heart className="w-6 h-6 text-[#B23A25]" />
+            <span>NGO Portal</span>
           </h1>
-          <p className="text-sm text-slate-400">
-            Find nearby food donations using MongoDB <code className="text-teal-300">2dsphere</code> geospatial indexing and GeoJSON coordinates.
+          <p className="text-xs text-[#6B5E52] mt-1">
+            Discover available food donations from local donors and coordinate volunteer pickups.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-slate-800">
+          <div className="flex items-center space-x-1 bg-white p-1 rounded-md border border-[#E3D9C8]">
             <button
               onClick={() => setUseGeoSearch(true)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                useGeoSearch ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
+              data-testid="toggle-nearby-btn"
+              className={`px-3 py-1.5 rounded text-xs font-semibold transition-all ${
+                useGeoSearch
+                  ? 'bg-[#F5EEDB] text-[#B23A25] border border-[#E3D9C8]'
+                  : 'text-[#6B5E52] hover:text-[#2B2118]'
               }`}
             >
-              Geospatial $near Mode
+              Nearby Proximity
             </button>
             <button
               onClick={() => setUseGeoSearch(false)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                !useGeoSearch ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
+              data-testid="toggle-all-available-btn"
+              className={`px-3 py-1.5 rounded text-xs font-semibold transition-all ${
+                !useGeoSearch
+                  ? 'bg-[#F5EEDB] text-[#B23A25] border border-[#E3D9C8]'
+                  : 'text-[#6B5E52] hover:text-[#2B2118]'
               }`}
             >
               All Available
@@ -119,7 +139,8 @@ export default function NgoDashboard() {
 
           <button
             onClick={loadData}
-            className="p-2 rounded-xl glass-card text-slate-300 hover:text-white hover:bg-slate-800 transition-all border border-slate-700"
+            data-testid="refresh-ngo-btn"
+            className="p-2 rounded-md border border-[#E3D9C8] text-[#6B5E52] hover:text-[#2B2118] hover:bg-white transition-colors bg-white"
             title="Refresh"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -127,60 +148,58 @@ export default function NgoDashboard() {
         </div>
       </div>
 
-      {/* Geospatial 2dsphere Query Tool */}
+      {/* Geospatial Query Panel */}
       {useGeoSearch && (
-        <form onSubmit={handleGeoSearch} className="glass-panel p-5 rounded-2xl border border-teal-500/30 space-y-4">
+        <form onSubmit={handleGeoSearch} className="glass-card p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-teal-400 font-bold text-sm">
-              <Navigation className="w-4 h-4" />
-              <span>MongoDB 2dsphere Geospatial Search Tool</span>
+            <div className="flex items-center space-x-2 text-xs font-semibold text-[#2B2118]">
+              <MapPin className="w-4 h-4 text-[#B23A25]" />
+              <span>Search Location & Distance</span>
             </div>
-            <span className="text-xs font-mono text-teal-300/80 bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/20">
-              Query: GET /api/donations/nearby?distance={distanceKm * 1000}m
+            <span className="text-xs text-[#4B6B36] font-mono bg-[#F5EEDB] border border-[#E3D9C8] px-2 py-0.5 rounded">
+              Radius: {distanceKm} km
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Latitude (Pune)</label>
+              <label className="block text-[11px] font-semibold text-[#6B5E52] mb-1">Center Latitude</label>
               <input
                 type="number"
                 step="0.0001"
                 value={lat}
                 onChange={(e) => setLat(parseFloat(e.target.value) || 18.5204)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono focus:border-teal-500 focus:outline-none"
+                className="w-full px-2.5 py-1.5 bg-white border border-[#E3D9C8] rounded-md text-xs text-[#2B2118] focus:border-[#B23A25] focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Longitude (Pune)</label>
+              <label className="block text-[11px] font-semibold text-[#6B5E52] mb-1">Center Longitude</label>
               <input
                 type="number"
                 step="0.0001"
                 value={lng}
                 onChange={(e) => setLng(parseFloat(e.target.value) || 73.8567)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono focus:border-teal-500 focus:outline-none"
+                className="w-full px-2.5 py-1.5 bg-white border border-[#E3D9C8] rounded-md text-xs text-[#2B2118] focus:border-[#B23A25] focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Max Distance: <span className="text-teal-400 font-bold">{distanceKm} km</span> ({distanceKm * 1000}m)
-              </label>
+              <label className="block text-[11px] font-semibold text-[#6B5E52] mb-1">Distance (km): {distanceKm}</label>
               <input
                 type="range"
                 min="1"
-                max="25"
+                max="50"
                 value={distanceKm}
-                onChange={(e) => setDistanceKm(parseInt(e.target.value))}
-                className="w-full accent-teal-500 cursor-pointer"
+                onChange={(e) => setDistanceKm(parseInt(e.target.value) || 10)}
+                className="w-full mt-2 accent-[#B23A25]"
               />
             </div>
-            <div>
+            <div className="flex items-end">
               <button
                 type="submit"
-                className="w-full flex items-center justify-center space-x-2 py-2.5 rounded-xl bg-teal-500 text-slate-950 font-bold hover:bg-teal-400 transition-all text-sm shadow-lg shadow-teal-500/20"
+                className="w-full btn-primary text-xs py-2 flex items-center justify-center space-x-1.5"
               >
-                <Search className="w-4 h-4" />
-                <span>Run $near Query</span>
+                <Search className="w-3.5 h-3.5" />
+                <span>Update Results</span>
               </button>
             </div>
           </div>
@@ -197,63 +216,79 @@ export default function NgoDashboard() {
       ) : (
         /* Donations Grid */
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-white flex items-center justify-between">
+          <h2 className="text-base font-normal font-heading text-[#2B2118] tracking-wide flex items-center justify-between">
             <span>Available Food Surplus ({donations.length})</span>
-            {useGeoSearch && <span className="text-xs font-normal text-teal-400">Showing results within {distanceKm} km radius</span>}
+            {useGeoSearch && <span className="text-xs font-normal text-[#6B5E52]">Within {distanceKm} km radius</span>}
           </h2>
 
           {loading ? (
-            <div className="text-center py-12 text-slate-400">Searching MongoDB 2dsphere index...</div>
+            <div className="text-center py-12 text-xs text-[#6B5E52]">Searching available donations...</div>
           ) : donations.length === 0 ? (
-            <div className="glass-card p-12 text-center rounded-2xl border border-slate-800 text-slate-400">
-              No donations found within {distanceKm} km. Try increasing the search distance slider.
+            <div className="glass-card p-12 text-center text-xs text-[#6B5E52] space-y-3">
+              <p className="text-sm text-[#2B2118] font-medium">No food available nearby right now.</p>
+              <p className="text-xs text-[#6B5E52]">Check back soon or widen your search distance to see more community donations.</p>
+              <div className="pt-2 flex justify-center gap-3">
+                <button
+                  onClick={() => setUseGeoSearch(false)}
+                  className="btn-secondary text-xs px-4 py-2"
+                >
+                  Show All Available
+                </button>
+                <button
+                  onClick={loadData}
+                  className="btn-primary text-xs px-4 py-2 inline-flex items-center space-x-1.5"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Refresh</span>
+                </button>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {donations.map((d) => (
-                <div key={d.id} className="glass-card p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4 hover:border-teal-500/40 transition-all">
+                <div key={d.id} className="glass-card p-5 flex flex-col justify-between space-y-4">
                   
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <span className="text-xs font-mono text-teal-400 font-semibold">{d.id}</span>
-                        <h3 className="text-base font-bold text-white mt-0.5">{d.category.replace('_', ' ')}</h3>
+                        <span className="text-[11px] font-mono text-[#6B5E52]" data-testid={`ngo-donation-id-${d.id}`}>{d.id}</span>
+                        <h3 className="text-base font-normal font-heading text-[#2B2118] mt-0.5 tracking-wide">
+                          {d.category?.replace('_', ' ')}
+                        </h3>
                       </div>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        {d.priority}
-                      </span>
+                      {getPriorityBadge(d.priority)}
                     </div>
 
                     {/* Food Items List */}
-                    <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 space-y-1.5">
-                      <span className="text-[10px] text-slate-400 uppercase font-semibold block">Surplus Items:</span>
+                    <div className="bg-[#FBF6EC] p-3 rounded-md border border-[#E3D9C8] space-y-1.5">
+                      <span className="text-[11px] text-[#6B5E52] uppercase font-semibold block">Surplus Items:</span>
                       {d.foodItems?.map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-xs text-slate-200 font-medium">
+                        <div key={idx} className="flex justify-between text-xs text-[#2B2118]">
                           <span>• {item.name}</span>
-                          <span className="text-teal-300">{item.quantity} {item.unit}</span>
+                          <span className="font-semibold text-[#4B6B36]">{item.quantity} {item.unit}</span>
                         </div>
                       ))}
                     </div>
 
-                    <div className="text-xs text-slate-400 space-y-1">
+                    <div className="text-xs text-[#6B5E52] space-y-1">
                       <div className="flex items-center space-x-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-[#B23A25] shrink-0" />
                         <span className="truncate">{d.address}</span>
                       </div>
-                      {d.location?.coordinates && (
-                        <div className="text-[11px] font-mono text-slate-500">
-                          GeoJSON: [{d.location.coordinates[0]}, {d.location.coordinates[1]}]
-                        </div>
-                      )}
+                      <div className="flex items-center space-x-1.5">
+                        <Clock className="w-3.5 h-3.5 text-[#8A5816] shrink-0" />
+                        <span>Expires: {new Date(d.expiryAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Request Button */}
                   <button
                     onClick={() => setSelectedDonation(d)}
-                    className="w-full py-2.5 rounded-xl bg-teal-500 text-slate-950 font-bold hover:bg-teal-400 transition-all text-xs shadow-md shadow-teal-500/10 flex items-center justify-center space-x-1.5"
+                    data-testid={`request-pickup-${d.id}`}
+                    className="w-full btn-primary text-xs py-2 flex items-center justify-center space-x-1.5"
                   >
-                    <Truck className="w-4 h-4" />
+                    <Truck className="w-3.5 h-3.5" />
                     <span>Request Pickup</span>
                   </button>
 
@@ -266,46 +301,50 @@ export default function NgoDashboard() {
 
       {/* Pickup Request Modal */}
       {selectedDonation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="glass-panel w-full max-w-lg p-6 rounded-3xl border border-slate-700 space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="glass-panel w-full max-w-lg p-6 rounded-lg bg-white border border-[#E3D9C8] space-y-5">
             
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <h2 className="text-lg font-bold text-white flex items-center space-x-2">
-                <Truck className="w-5 h-5 text-teal-400" />
-                <span>Assign Pickup for Donation #{selectedDonation.id}</span>
+            <div className="flex items-center justify-between border-b border-[#E3D9C8] pb-3">
+              <h2 className="text-lg font-normal font-heading text-[#2B2118] tracking-wide flex items-center space-x-2">
+                <Truck className="w-5 h-5 text-[#B23A25]" />
+                <span>Request Pickup for #{selectedDonation.id}</span>
               </h2>
-              <button onClick={() => setSelectedDonation(null)} className="text-slate-400 hover:text-white font-bold">✕</button>
+              <button 
+                onClick={() => setSelectedDonation(null)} 
+                className="text-[#8C7E72] hover:text-[#2B2118] font-bold text-base px-2 py-1"
+              >
+                ✕
+              </button>
             </div>
 
             <form onSubmit={handleRequestPickup} className="space-y-4">
               
-              <div className="bg-slate-900 p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1">
-                <div><strong className="text-white">Category:</strong> {selectedDonation.category}</div>
-                <div><strong className="text-white">Address:</strong> {selectedDonation.address}</div>
+              <div className="bg-[#FBF6EC] p-3.5 rounded-md border border-[#E3D9C8] text-xs text-[#6B5E52] space-y-1">
+                <div><strong className="text-[#2B2118]">Category:</strong> {selectedDonation.category}</div>
+                <div><strong className="text-[#2B2118]">Pickup Address:</strong> {selectedDonation.address}</div>
                 <div>
-                  <strong className="text-white">Items:</strong>{' '}
+                  <strong className="text-[#2B2118]">Items:</strong>{' '}
                   {selectedDonation.foodItems?.map(i => `${i.name} (${i.quantity} ${i.unit})`).join(', ')}
                 </div>
               </div>
 
-              <div className="p-3 bg-teal-500/10 border border-teal-500/20 rounded-xl flex items-center justify-between text-xs">
+              <div className="p-3 bg-[#FBF6EC] border border-[#E3D9C8] rounded-md flex items-center justify-between text-xs">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Requesting Pickup as:</span>
-                  <span className="font-semibold text-teal-300">{user?.name || 'Logged-in NGO'} ({user?.email})</span>
-                  {user?.ngoId && <span className="text-[10px] text-teal-400 font-mono ml-2">NGO ID: {user?.ngoId}</span>}
+                  <span className="text-[#6B5E52] block text-[11px]">Requesting as:</span>
+                  <span className="font-semibold text-[#2B2118]">{user?.name || 'Logged-in NGO'} ({user?.email})</span>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] bg-teal-500/20 text-teal-400 font-mono font-bold uppercase">
+                <span className="px-2 py-0.5 rounded text-[10px] bg-[#F5EEDB] text-[#4B6B36] border border-[#E3D9C8] font-bold uppercase">
                   {user?.role || 'NGO'}
                 </span>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Assign Volunteer (Optional)</label>
+                <label className="block text-xs font-semibold text-[#2B2118] mb-1">Assign Volunteer (Optional)</label>
                 {volunteers.length > 0 ? (
                   <select
                     value={selectedVolunteerId}
                     onChange={(e) => setSelectedVolunteerId(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 focus:outline-none"
+                    className="w-full bg-white border border-[#E3D9C8] rounded-md px-3 py-2 text-xs text-[#2B2118] focus:border-[#B23A25] focus:outline-none"
                   >
                     <option value="">-- No volunteer assigned yet (open for pickup) --</option>
                     {volunteers.map(v => (
@@ -321,34 +360,27 @@ export default function NgoDashboard() {
                       placeholder="Enter Volunteer ID (optional)"
                       value={selectedVolunteerId}
                       onChange={(e) => setSelectedVolunteerId(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 focus:outline-none"
+                      className="w-full bg-white border border-[#E3D9C8] rounded-md px-3 py-2 text-xs text-[#2B2118] focus:border-[#B23A25] focus:outline-none"
                     />
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-[#6B5E52]">
                       You can assign a volunteer later, or leave blank to allow registered volunteers to accept.
                     </p>
                   </div>
                 )}
               </div>
 
-              <div className="p-3 bg-teal-500/10 border border-teal-500/20 rounded-xl text-xs text-teal-300 space-y-1">
-                <strong className="text-teal-400 block font-semibold">MongoDB Document Reference Notice:</strong>
-                <span>This action creates a <code className="text-white">Pickup</code> document storing references:</span>
-                <div className="font-mono text-[11px] text-teal-200 mt-1">
-                  donationId: "{selectedDonation.id}" | ngoId: "{user?.ngoId || 'N/A'}" | volunteerId: "{selectedVolunteerId}"
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#E3D9C8]">
                 <button
                   type="button"
                   onClick={() => setSelectedDonation(null)}
-                  className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-sm"
+                  className="px-4 py-2 rounded-md text-[#6B5E52] hover:text-[#2B2118] text-xs font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-teal-500 text-slate-950 font-bold hover:bg-teal-400 transition-all text-sm shadow-lg shadow-teal-500/20"
+                  data-testid="confirm-pickup-submit"
+                  className="btn-primary text-xs px-5 py-2"
                 >
                   Confirm Pickup Request
                 </button>

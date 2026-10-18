@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Utensils, Heart, Truck, Database, ArrowRight, Layers, MapPin, Cpu, Star, Package, RefreshCw, AlertTriangle } from 'lucide-react';
+import { ArrowRight, RefreshCw, AlertCircle } from 'lucide-react';
 import { api } from '../api';
 import ErrorState from '../components/ErrorState';
+import { useAuth } from '../context/AuthContext';
 
 export default function Home({ setActiveTab }) {
+  const { isAuthenticated, user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [backendError, setBackendError] = useState(null);
+  const [imageError, setImageError] = useState(false);
 
   const loadLiveStats = async () => {
     setLoading(true);
@@ -26,216 +29,217 @@ export default function Home({ setActiveTab }) {
     loadLiveStats();
   }, []);
 
+  const handleCtaClick = () => {
+    if (!isAuthenticated) {
+      setActiveTab('register');
+    } else if (user?.role === 'DONOR') {
+      setActiveTab('donor');
+    } else if (user?.role === 'NGO') {
+      setActiveTab('ngo');
+    } else if (user?.role === 'VOLUNTEER') {
+      setActiveTab('volunteer');
+    } else {
+      setActiveTab('admin');
+    }
+  };
+
+  const isStatsEmpty = !loading && stats && (
+    Number(stats.totalDonations || 0) === 0 &&
+    Number(stats.totalFoodQuantity || 0) === 0 &&
+    Number(stats.statusDistribution?.AVAILABLE || 0) === 0
+  );
+
   return (
-    <div className="space-y-12 py-6">
+    <div className="space-y-12 py-2" data-testid="home-page">
       
-      {/* Backend Error Banner on Landing Page */}
+      {/* Backend Error State if server is down */}
       {backendError && (
         <ErrorState
           title="Backend Server Offline"
-          message="The Spring Boot API server (http://localhost:8080) is currently offline or unreachable. Live database metrics and CRUD portals require a running backend with MongoDB Atlas connection."
+          message="The API server is currently unreachable. Live community metrics will appear once connection is restored."
           onRetry={loadLiveStats}
           loading={loading}
         />
       )}
 
-      {/* Hero Banner */}
-      <div className="relative rounded-3xl overflow-hidden glass-panel p-8 sm:p-12 border border-emerald-500/20 shadow-2xl shadow-emerald-500/5">
-        <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        
-        <div className="max-w-3xl space-y-6 relative z-10">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
-            <Database className="w-4 h-4" />
-            <span>College Microproject: Advanced Database Systems</span>
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            FoodRescue — Smart Surplus Food Redistribution System
+      {/* Hero Section */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div className="lg:col-span-7 space-y-5">
+          {/* Three alternative hero headlines:
+              Option 1 (active): "Fresh surplus food, delivered to local shelters."
+              Option 2: "Good food shouldn't go to waste when neighbors need a meal."
+              Option 3: "From local kitchens and shops straight to community tables."
+          */}
+          <h1 className="text-4xl sm:text-5xl font-normal font-heading text-[#2B2118] leading-[1.2] tracking-wide">
+            Fresh surplus food, delivered to local shelters.
           </h1>
 
-          <p className="text-lg text-slate-300 leading-relaxed">
-            Connecting surplus edible food from hotels & cafeterias with NGOs and volunteers. Built specifically to demonstrate <strong className="text-emerald-400 font-semibold">MongoDB document design, embedded arrays, 2dsphere geospatial indexing, references, and aggregation pipelines</strong>.
+          <p className="text-base sm:text-lg text-[#6B5E52] leading-relaxed max-w-2xl">
+            Restaurants and shops post food they can't sell. Nearby shelters claim it. A volunteer drives it over.
           </p>
 
-          <div className="flex flex-wrap gap-4 pt-2">
+          <div className="flex flex-wrap items-center gap-4 pt-1">
             <button
-              onClick={() => setActiveTab('insights')}
-              className="flex items-center space-x-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold hover:from-emerald-400 hover:to-teal-400 transition-all shadow-lg shadow-emerald-500/25"
+              onClick={handleCtaClick}
+              data-testid="hero-cta-btn"
+              className="btn-primary text-sm px-6 py-2.5 flex items-center space-x-2"
             >
-              <Database className="w-5 h-5" />
-              <span>Database Insights (Viva Evaluation)</span>
+              <span>{isAuthenticated ? 'Go to Dashboard' : 'Join the Network'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
-
             <button
-              onClick={() => setActiveTab('donor')}
-              className="flex items-center space-x-2 px-6 py-3.5 rounded-xl glass-card text-white font-semibold hover:bg-slate-800 transition-all border border-slate-700"
+              onClick={() => setActiveTab(isAuthenticated ? (user?.role === 'DONOR' ? 'donor' : 'home') : 'login')}
+              data-testid="hero-secondary-btn"
+              className="btn-secondary text-sm px-5 py-2.5"
             >
-              <Utensils className="w-5 h-5 text-emerald-400" />
-              <span>Try Donor Portal</span>
+              {isAuthenticated ? 'View Portal' : 'Sign In to Your Account'}
             </button>
           </div>
         </div>
 
-        {/* Live MongoDB Metrics in Hero Section */}
-        <div className="mt-10 pt-8 border-t border-slate-800/80 relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${backendError ? 'bg-rose-500' : 'bg-emerald-400 animate-pulse'}`}></span>
-              Live MongoDB Aggregation Impact Metrics
-            </span>
-            <button 
-              onClick={loadLiveStats} 
-              className="text-xs text-slate-400 hover:text-emerald-300 flex items-center gap-1"
+        {/* Hero Photo / Neutral Placeholder Slot */}
+        <div className="lg:col-span-5">
+          <div className="relative rounded-[8px] overflow-hidden border border-[#E3D9C8] bg-[#F5EEDB] aspect-[4/3] flex items-center justify-center">
+            {!imageError ? (
+              <img
+                src="/images/hero.png"
+                alt="A volunteer hands a box of food to a neighbor outside a community kitchen"
+                className="w-full h-full object-cover rounded-[8px]"
+                style={{ objectFit: 'cover', objectPosition: '50% 40%' }}
+                onError={() => setImageError(true)}
+              />
+            ) : null}
+            {/* When image is missing or errors, clean neutral warm-colored block with no icon or text */}
+          </div>
+        </div>
+      </section>
+
+      {/* Live Impact Stats */}
+      <section className="border-y border-[#E3D9C8] py-8 bg-[#FBF6EC] -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#6B5E52]">
+              Live Community Impact
+            </h2>
+            <button
+              onClick={loadLiveStats}
+              disabled={loading}
+              className="text-xs text-[#6B5E52] hover:text-[#B23A25] flex items-center space-x-1 transition-colors"
               title="Refresh live metrics"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Refresh Stats</span>
+              <span className="hidden sm:inline">Refresh</span>
             </button>
           </div>
 
-          {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-pulse">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 h-20"></div>
-              ))}
-            </div>
-          ) : backendError ? (
-            <div className="bg-rose-950/20 border border-rose-500/20 rounded-xl p-4 text-xs text-rose-300 flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
-                Backend offline. Live hero metrics are unavailable until the backend starts.
-              </span>
-              <button onClick={loadLiveStats} className="underline hover:text-white font-semibold">Retry</button>
+          {isStatsEmpty ? (
+            <div className="py-6 text-center space-y-3">
+              <p className="text-sm text-[#6B5E52]">
+                No food shared yet. Be the first to post a donation.
+              </p>
+              <button
+                onClick={handleCtaClick}
+                className="btn-primary text-xs px-5 py-2 inline-flex items-center space-x-1.5"
+              >
+                <span>Post a Donation</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Total Donations</span>
-                <p className="text-2xl font-black text-white mt-1">{stats?.totalDonations ?? 0}</p>
-                <span className="text-[10px] text-slate-500 font-mono">mongoTemplate.count</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="space-y-1">
+                <span className="text-xs text-[#6B5E52] font-medium">Total Donations</span>
+                <p className="text-3xl font-normal font-heading text-[#2B2118]">
+                  {stats?.totalDonations ?? (loading ? '—' : 0)}
+                </p>
+                <p className="text-[11px] text-[#8C7E72]">Contributed by registered donors</p>
               </div>
 
-              <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80">
-                <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wide">Surplus Rescued</span>
-                <p className="text-2xl font-black text-emerald-400 mt-1">
-                  {stats?.totalFoodQuantity ?? 0} <span className="text-xs font-normal text-slate-400">units</span>
+              <div className="space-y-1">
+                <span className="text-xs text-[#6B5E52] font-medium">Meals Rescued</span>
+                <p className="text-3xl font-normal font-heading text-[#B23A25]">
+                  {stats?.totalFoodQuantity ?? (loading ? '—' : 0)}
                 </p>
-                <span className="text-[10px] text-emerald-500/70 font-mono">$unwind + $sum</span>
+                <p className="text-[11px] text-[#8C7E72]">Portions diverted from waste</p>
               </div>
 
-              <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80">
-                <span className="text-[11px] font-semibold text-amber-400 uppercase tracking-wide">Average Rating</span>
-                <p className="text-2xl font-black text-amber-400 mt-1 flex items-center gap-1">
-                  <span>{stats?.averageRating ? stats.averageRating : 'N/A'}</span>
-                  {stats?.averageRating > 0 && <Star className="w-4 h-4 fill-amber-400 text-amber-400 inline" />}
+              <div className="space-y-1">
+                <span className="text-xs text-[#6B5E52] font-medium">Average Rating</span>
+                <p className="text-3xl font-normal font-heading text-[#2B2118]">
+                  {stats?.averageRating ? `${stats.averageRating} / 5` : (loading ? '—' : '5.0 / 5')}
                 </p>
-                <span className="text-[10px] text-amber-500/70 font-mono">$group $avg</span>
+                <p className="text-[11px] text-[#8C7E72]">Feedback from partner shelters</p>
               </div>
 
-              <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80">
-                <span className="text-[11px] font-semibold text-cyan-400 uppercase tracking-wide">Available Surplus</span>
-                <p className="text-2xl font-black text-cyan-300 mt-1">
-                  {stats?.statusDistribution?.AVAILABLE ?? 0} <span className="text-xs font-normal text-slate-400">active</span>
+              <div className="space-y-1">
+                <span className="text-xs text-[#6B5E52] font-medium">Available Now</span>
+                <p className="text-3xl font-normal font-heading text-[#4B6B36]">
+                  {stats?.statusDistribution?.AVAILABLE ?? (loading ? '—' : 0)}
                 </p>
-                <span className="text-[10px] text-cyan-500/70 font-mono">$group status</span>
+                <p className="text-[11px] text-[#8C7E72]">Awaiting pickup requests</p>
               </div>
             </div>
           )}
         </div>
-      </div>
+      </section>
 
-      {/* Core Database Concepts Demonstrated */}
-      <div className="space-y-6">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <h2 className="text-2xl font-bold text-white">Core MongoDB Concepts Demonstrated</h2>
-          <p className="text-sm text-slate-400">
-            Every feature in this application directly maps to a fundamental document database concept for college evaluation.
+      {/* How the Process Works - Line-style 3-Step Overview */}
+      <section className="space-y-8 pt-2">
+        <div className="text-center max-w-xl mx-auto space-y-2">
+          <h2 className="text-2xl font-normal font-heading text-[#2B2118] tracking-wide">
+            How food rescue works
+          </h2>
+          <p className="text-sm text-[#6B5E52]">
+            Three simple steps from kitchen surplus to a hot meal.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4 hover:border-emerald-500/30 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-              <Layers className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-white">Embedded Documents & Arrays</h3>
-            <p className="text-sm text-slate-400">
-              Each donation document embeds an array of <code className="text-emerald-300">foodItems[]</code> and <code className="text-emerald-300">statusHistory[]</code> to avoid multi-table joins and keep related data atomic.
-            </p>
-          </div>
+        <div className="relative">
+          {/* Horizontal connecting line on desktop */}
+          <div className="hidden md:block absolute top-5 left-1/6 right-1/6 h-[2px] bg-[#E3D9C8] z-0"></div>
 
-          <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4 hover:border-emerald-500/30 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center">
-              <MapPin className="w-6 h-6" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+            {/* Step 1 */}
+            <div className="text-center md:text-left space-y-3">
+              <div className="w-10 h-10 rounded-full bg-white border-2 border-[#B23A25] text-[#B23A25] font-bold text-sm flex items-center justify-center mx-auto md:mx-0 shadow-none">
+                1
+              </div>
+              <h3 className="text-base font-normal font-heading text-[#2B2118] tracking-wide">
+                Post surplus
+              </h3>
+              <p className="text-xs text-[#6B5E52] leading-relaxed">
+                Restaurants, bakeries, and grocers list edible food they cannot sell before closing.
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-white">2dsphere Geospatial Indexing</h3>
-            <p className="text-sm text-slate-400">
-              Stores GeoJSON <code className="text-teal-300">Point</code> coordinates <code className="text-teal-300">[longitude, latitude]</code> to execute fast spherical proximity searches (<code className="text-teal-300">$nearSphere</code>) for nearby food pickups.
-            </p>
-          </div>
 
-          <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4 hover:border-emerald-500/30 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-              <Cpu className="w-6 h-6" />
+            {/* Step 2 */}
+            <div className="text-center md:text-left space-y-3">
+              <div className="w-10 h-10 rounded-full bg-white border-2 border-[#4B6B36] text-[#4B6B36] font-bold text-sm flex items-center justify-center mx-auto md:mx-0 shadow-none">
+                2
+              </div>
+              <h3 className="text-base font-normal font-heading text-[#2B2118] tracking-wide">
+                Claim food
+              </h3>
+              <p className="text-xs text-[#6B5E52] leading-relaxed">
+                Nearby shelters and soup kitchens view available donations and claim what they need.
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-white">Aggregation Pipelines</h3>
-            <p className="text-sm text-slate-400">
-              Demonstrates 6 MongoDB aggregation pipelines utilizing <code className="text-cyan-300">$match</code>, <code className="text-cyan-300">$unwind</code>, <code className="text-cyan-300">$group</code>, <code className="text-cyan-300">$sort</code>, and <code className="text-cyan-300">$avg</code> stages for analytics.
-            </p>
+
+            {/* Step 3 */}
+            <div className="text-center md:text-left space-y-3">
+              <div className="w-10 h-10 rounded-full bg-white border-2 border-[#B23A25] text-[#B23A25] font-bold text-sm flex items-center justify-center mx-auto md:mx-0 shadow-none">
+                3
+              </div>
+              <h3 className="text-base font-normal font-heading text-[#2B2118] tracking-wide">
+                Deliver
+              </h3>
+              <p className="text-xs text-[#6B5E52] leading-relaxed">
+                A local volunteer driver picks up the food and drops it off at the shelter.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Role Navigation Cards */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-white">System Portals</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div onClick={() => setActiveTab('donor')} className="glass-card p-5 rounded-xl border border-slate-800 hover:border-emerald-500/40 cursor-pointer transition-all group">
-            <div className="flex items-center justify-between mb-3">
-              <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all">
-                <Utensils className="w-5 h-5" />
-              </span>
-              <span className="text-xs font-semibold text-slate-400">Donor</span>
-            </div>
-            <h4 className="font-bold text-white mb-1">Donor Dashboard</h4>
-            <p className="text-xs text-slate-400">Register food surplus with embedded food items & expiry time.</p>
-          </div>
-
-          <div onClick={() => setActiveTab('ngo')} className="glass-card p-5 rounded-xl border border-slate-800 hover:border-teal-500/40 cursor-pointer transition-all group">
-            <div className="flex items-center justify-between mb-3">
-              <span className="p-2 rounded-lg bg-teal-500/10 text-teal-400 group-hover:bg-teal-500 group-hover:text-slate-950 transition-all">
-                <Heart className="w-5 h-5" />
-              </span>
-              <span className="text-xs font-semibold text-slate-400">NGO</span>
-            </div>
-            <h4 className="font-bold text-white mb-1">NGO Dashboard</h4>
-            <p className="text-xs text-slate-400">Search nearby donations using 2dsphere location queries & request pickup.</p>
-          </div>
-
-          <div onClick={() => setActiveTab('volunteer')} className="glass-card p-5 rounded-xl border border-slate-800 hover:border-amber-500/40 cursor-pointer transition-all group">
-            <div className="flex items-center justify-between mb-3">
-              <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-slate-950 transition-all">
-                <Truck className="w-5 h-5" />
-              </span>
-              <span className="text-xs font-semibold text-slate-400">Volunteer</span>
-            </div>
-            <h4 className="font-bold text-white mb-1">Volunteer Portal</h4>
-            <p className="text-xs text-slate-400">Update pickup status & track completed deliveries.</p>
-          </div>
-
-          <div onClick={() => setActiveTab('insights')} className="glass-card p-5 rounded-xl border border-slate-800 hover:border-emerald-400 cursor-pointer transition-all group ring-1 ring-emerald-500/30">
-            <div className="flex items-center justify-between mb-3">
-              <span className="p-2 rounded-lg bg-emerald-500 text-slate-950 font-bold">
-                <Database className="w-5 h-5" />
-              </span>
-              <span className="text-xs font-bold text-emerald-400 uppercase">Viva Highlight</span>
-            </div>
-            <h4 className="font-bold text-white mb-1">Database Insights</h4>
-            <p className="text-xs text-slate-400">Inspect raw MongoDB collections, indexes, and aggregation cards.</p>
-          </div>
-        </div>
-      </div>
+      </section>
 
     </div>
   );

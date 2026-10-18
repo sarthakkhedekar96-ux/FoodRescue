@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Award, Star, Utensils, PieChart, BarChart3, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, Award, Star, BarChart3, RefreshCw } from 'lucide-react';
 import { api } from '../api';
 import ErrorState from '../components/ErrorState';
 
@@ -27,31 +27,32 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="space-y-8 py-4">
+    <div className="space-y-8 py-4" data-testid="admin-dashboard">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-[#E3D9C8]">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <LayoutDashboard className="w-6 h-6 text-cyan-400" />
-            <span>Admin Analytics & Aggregation Pipelines</span>
+          <h1 className="text-2xl font-normal font-heading text-[#2B2118] tracking-wide flex items-center gap-2" data-testid="admin-heading">
+            <LayoutDashboard className="w-6 h-6 text-[#B23A25]" />
+            <span>Network Analytics & Oversight</span>
           </h1>
-          <p className="text-sm text-slate-400">
-            Real-time analytics powered by MongoDB Aggregation Pipelines (<code className="text-cyan-300">$group, $unwind, $avg, $sum, $sort</code>).
+          <p className="text-xs text-[#6B5E52] mt-1">
+            Real-time overview of surplus food rescued, partner participation, and quality metrics across the platform.
           </p>
         </div>
 
         <button
           onClick={loadStats}
-          className="p-2.5 rounded-xl glass-card text-slate-300 hover:text-white hover:bg-slate-800 transition-all border border-slate-700 flex items-center space-x-2 text-xs font-semibold"
+          data-testid="refresh-admin-stats-btn"
+          className="btn-secondary text-xs px-3.5 py-2 flex items-center space-x-1.5"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          <span>Execute Aggregations</span>
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          <span>Refresh Analytics</span>
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center py-16 text-slate-400">Running MongoDB Aggregation Pipelines...</div>
+        <div className="text-center py-16 text-xs text-[#6B5E52]">Compiling network analytics...</div>
       ) : error ? (
         <ErrorState
           error={error}
@@ -59,111 +60,119 @@ export default function AdminDashboard() {
           loading={loading}
         />
       ) : !stats ? (
-        <div className="text-center py-16 text-slate-400">Unable to load aggregation analytics.</div>
+        <div className="text-center py-16 text-xs text-[#6B5E52]">Unable to load analytics.</div>
       ) : (
         <div className="space-y-8">
           
-          {/* Top Aggregation Summary Metric Cards */}
+          {/* Top Summary Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
-            <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-2">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Aggregation 1</span>
-              <p className="text-sm font-semibold text-slate-300">Total Donations</p>
-              <p className="text-3xl font-extrabold text-white">{stats.totalDonations}</p>
-              <span className="text-[11px] text-slate-500 font-mono block">mongoTemplate.count()</span>
+            <div className="glass-card p-5 space-y-1">
+              <span className="text-xs font-semibold text-[#6B5E52]">Total Donations</span>
+              <p className="text-3xl font-normal font-heading text-[#2B2118]">{stats.totalDonations}</p>
+              <p className="text-[11px] text-[#8C7E72]">All-time registered contributions</p>
             </div>
 
-            <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-2">
-              <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Aggregation 6</span>
-              <p className="text-sm font-semibold text-emerald-300">Total Surplus Donated</p>
-              <p className="text-3xl font-extrabold text-emerald-400">{stats.totalFoodQuantity} <span className="text-base font-normal">Units</span></p>
-              <span className="text-[11px] text-emerald-400/70 font-mono block">$unwind + $group $sum</span>
-            </div>
-
-            <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-2">
-              <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Aggregation 5</span>
-              <p className="text-sm font-semibold text-amber-300">Average Feedback Rating</p>
-              <p className="text-3xl font-extrabold text-amber-400 flex items-center space-x-1.5">
-                <span>{stats.averageRating}</span>
-                <Star className="w-6 h-6 fill-amber-400 text-amber-400 inline" />
+            <div className="glass-card p-5 space-y-1">
+              <span className="text-xs font-semibold text-[#B23A25]">Portions Rescued</span>
+              <p className="text-3xl font-normal font-heading text-[#B23A25]">
+                {stats.totalFoodQuantity} <span className="text-sm font-normal text-[#6B5E52]">Units</span>
               </p>
-              <span className="text-[11px] text-amber-400/70 font-mono block">$group $avg("$rating")</span>
+              <p className="text-[11px] text-[#8C7E72]">Diverted from landfill waste</p>
             </div>
 
-            <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-2">
-              <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">Aggregation 4</span>
-              <p className="text-sm font-semibold text-cyan-300">Available vs Completed</p>
-              <p className="text-2xl font-extrabold text-white">
-                <span className="text-emerald-400">{stats.statusDistribution?.AVAILABLE || 0} Avail</span>
-                <span className="text-slate-500 mx-1.5">/</span>
-                <span className="text-teal-300">{stats.statusDistribution?.COMPLETED || 0} Done</span>
+            <div className="glass-card p-5 space-y-1">
+              <span className="text-xs font-semibold text-[#8A5816]">Average Shelter Rating</span>
+              <p className="text-3xl font-normal font-heading text-[#8A5816] flex items-center space-x-1.5">
+                <span>{stats.averageRating ? stats.averageRating : 'N/A'}</span>
+                {stats.averageRating > 0 && <Star className="w-5 h-5 fill-[#8A5816] text-[#8A5816] inline" />}
               </p>
-              <span className="text-[11px] text-cyan-400/70 font-mono block">$group by "$status"</span>
+              <p className="text-[11px] text-[#8C7E72]">Based on volunteer delivery feedback</p>
+            </div>
+
+            <div className="glass-card p-5 space-y-1">
+              <span className="text-xs font-semibold text-[#6B5E52]">Available vs Completed</span>
+              <p className="text-2xl font-normal font-heading text-[#2B2118]">
+                <span className="text-[#4B6B36]">{stats.statusDistribution?.AVAILABLE || 0} Avail</span>
+                <span className="text-[#8C7E72] mx-1.5 font-normal">/</span>
+                <span className="text-[#375225]">{stats.statusDistribution?.COMPLETED || 0} Done</span>
+              </p>
+              <p className="text-[11px] text-[#8C7E72]">Active pipeline distribution</p>
             </div>
 
           </div>
 
-          {/* Aggregation 2: Category Distribution Breakdown */}
-          <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                  <BarChart3 className="w-5 h-5 text-emerald-400" />
-                  <span>Aggregation 2: Donations by Food Category</span>
-                </h3>
-                <p className="text-xs text-slate-400">
-                  MongoDB Pipeline: <code className="text-emerald-300">$group _id: "$category", count: &#123;$sum: 1&#125;</code> + <code className="text-emerald-300">$sort</code>
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {stats.categoryDistribution?.map((cat, idx) => {
-                const maxCount = Math.max(...stats.categoryDistribution.map(c => c.count), 1);
-                const percent = Math.round((cat.count / maxCount) * 100);
-                return (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold text-slate-300">
-                      <span>{cat.category.replace('_', ' ')}</span>
-                      <span className="text-emerald-400 font-mono">{cat.count} Donations ({percent}%)</span>
-                    </div>
-                    <div className="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-slate-800">
-                      <div
-                        className="bg-gradient-to-r from-emerald-500 to-teal-400 h-3 rounded-full transition-all duration-500"
-                        style={{ width: `${percent}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Aggregation 3: Top Donors Leaderboard */}
-          <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-6">
+          {/* Category Distribution Breakdown */}
+          <div className="glass-card p-6 space-y-5">
             <div>
-              <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                <Award className="w-5 h-5 text-amber-400" />
-                <span>Aggregation 3: Top Donors Leaderboard</span>
+              <h3 className="text-base font-normal font-heading text-[#2B2118] tracking-wide flex items-center space-x-2">
+                <BarChart3 className="w-4 h-4 text-[#B23A25]" />
+                <span>Food Donations by Category</span>
               </h3>
-              <p className="text-xs text-slate-400">
-                MongoDB Pipeline: <code className="text-amber-300">$group _id: "$donorId", $sort: -1, $limit: 5</code>
+              <p className="text-xs text-[#6B5E52] mt-0.5">
+                Breakdown of food types registered by participating kitchens and suppliers.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {stats.topDonors?.map((donor, idx) => (
-                <div key={idx} className="bg-slate-900/80 p-4 rounded-xl border border-slate-800 flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center font-extrabold text-sm border border-amber-500/20 shrink-0">
-                    #{idx + 1}
-                  </div>
-                  <div className="overflow-hidden">
-                    <h4 className="font-bold text-white text-sm truncate">{donor.donorName}</h4>
-                    <span className="text-xs font-mono text-amber-400 font-semibold">{donor.donationCount} Donations</span>
-                  </div>
-                </div>
-              ))}
+            {(!stats.categoryDistribution || stats.categoryDistribution.length === 0) ? (
+              <div className="py-6 text-center text-xs text-[#6B5E52]">
+                No categories recorded yet. Breakdown will display once donations are added.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {stats.categoryDistribution?.map((cat, idx) => {
+                  const maxCount = Math.max(...stats.categoryDistribution.map(c => c.count), 1);
+                  const percent = Math.round((cat.count / maxCount) * 100);
+                  return (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold text-[#2B2118]">
+                        <span>{cat.category?.replace('_', ' ')}</span>
+                        <span className="text-[#4B6B36] font-mono">{cat.count} Donations ({percent}%)</span>
+                      </div>
+                      <div className="w-full bg-[#F5EEDB] rounded-full h-2 overflow-hidden border border-[#E3D9C8]">
+                        <div
+                          className="bg-[#B23A25] h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${percent}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Top Donors Leaderboard */}
+          <div className="glass-card p-6 space-y-5">
+            <div>
+              <h3 className="text-base font-normal font-heading text-[#2B2118] tracking-wide flex items-center space-x-2">
+                <Award className="w-4 h-4 text-[#8A5816]" />
+                <span>Top Contributing Food Donors</span>
+              </h3>
+              <p className="text-xs text-[#6B5E52] mt-0.5">
+                Organizations with the highest volume of rescued meals.
+              </p>
             </div>
+
+            {(!stats.topDonors || stats.topDonors.length === 0) ? (
+              <div className="py-6 text-center text-xs text-[#6B5E52]">
+                No donor contributions recorded yet. New partner contributions will appear here.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {stats.topDonors?.map((donor, idx) => (
+                  <div key={idx} className="bg-[#FBF6EC] p-4 rounded-md border border-[#E3D9C8] flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-[#F5EEDB] text-[#8A5816] flex items-center justify-center font-bold text-xs border border-[#E8D1A7] shrink-0">
+                      #{idx + 1}
+                    </div>
+                    <div className="overflow-hidden">
+                      <h4 className="font-semibold text-[#2B2118] text-xs truncate">{donor.donorName}</h4>
+                      <span className="text-[11px] font-mono text-[#4B6B36] font-medium">{donor.donationCount} Donations</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>

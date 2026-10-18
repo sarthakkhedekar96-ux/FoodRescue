@@ -116,22 +116,22 @@ function MainApp() {
     if (!isAuthenticated) {
       return (
         <div className="max-w-md mx-auto my-12 text-center space-y-4">
-          <div className="glass-panel p-8 rounded-3xl border border-slate-800 space-y-4">
-            <ShieldAlert className="w-12 h-12 text-amber-400 mx-auto" />
-            <h2 className="text-xl font-bold text-white">Authentication Required</h2>
-            <p className="text-xs text-slate-400">
+          <div className="glass-panel p-8 rounded-lg border border-[#E3D9C8] bg-white space-y-4">
+            <ShieldAlert className="w-12 h-12 text-[#B23A25] mx-auto" />
+            <h2 className="text-xl font-heading text-[#2B2118]">Authentication Required</h2>
+            <p className="text-xs text-[#6B5E52]">
               You must sign in with a registered FoodRescue account to access this portal.
             </p>
             <div className="flex justify-center gap-3 pt-2">
               <button
                 onClick={() => setActiveTab('login')}
-                className="px-5 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-all shadow-md"
+                className="btn-primary text-xs"
               >
                 Sign In
               </button>
               <button
                 onClick={() => setActiveTab('register')}
-                className="px-5 py-2.5 rounded-xl glass-card text-white text-xs font-semibold hover:bg-slate-800 transition-all border border-slate-700"
+                className="btn-secondary text-xs"
               >
                 Register
               </button>
@@ -183,23 +183,23 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#FBF6EC] text-[#2B2118] flex flex-col font-body">
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
       
       {/* Global Backend Offline Banner */}
       {backendDown && (
-        <div className="bg-rose-500/10 border-b border-rose-500/30 px-4 py-2.5 text-xs text-rose-300 flex items-center justify-between">
+        <div className="bg-[#F8E7E3] border-b border-[#E8C1B7] px-4 py-2.5 text-xs text-[#963826] flex items-center justify-between">
           <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 animate-pulse" />
+              <AlertCircle className="w-4 h-4 text-[#B23A25] shrink-0" />
               <span>
-                <strong className="font-semibold text-rose-200">Backend Server Offline:</strong> Unable to connect to FoodRescue API (http://localhost:8080).
+                <strong className="font-semibold">Backend Offline:</strong> Unable to connect to the server at http://localhost:8080.
               </span>
             </div>
             <button
               onClick={checkHealth}
               disabled={healthLoading}
-              className="ml-4 px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-semibold text-[11px] flex items-center space-x-1 shrink-0 transition-all"
+              className="ml-4 px-3 py-1 rounded-md bg-white border border-[#E8C1B7] hover:bg-[#FAF3E5] text-[#B23A25] font-semibold text-[11px] flex items-center space-x-1 shrink-0 transition-all"
             >
               <RefreshCw className={`w-3 h-3 ${healthLoading ? 'animate-spin' : ''}`} />
               <span>Retry</span>
@@ -212,23 +212,10 @@ function MainApp() {
         {renderDashboard()}
       </main>
 
-      <footer className="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 space-y-2">
-        <div className="flex items-center justify-center space-x-2">
-          {backendDown ? (
-            <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[11px] font-mono">
-              <XCircle className="w-3.5 h-3.5" />
-              <span>Backend Offline (localhost:8080)</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-mono">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Backend Online • DB: {dbHealth?.database || 'foodrescue'} ({dbHealth?.status || 'UP'})</span>
-            </span>
-          )}
-        </div>
-        <p>FoodRescue — Smart Food Waste Redistribution System (Spring Security + JWT + MongoDB)</p>
-        <p className="text-[11px] text-slate-600 font-mono">
-          Java 17 • Spring Boot 3.2 • Spring Security • JJWT • React + Vite • Tailwind CSS
+      <footer className="border-t border-[#E3D9C8] bg-[#FBF6EC] py-6 text-center text-xs text-[#6B5E52] space-y-1">
+        <p className="font-semibold text-[#2B2118]">FoodRescue — Community Food Sharing Network</p>
+        <p className="text-[11px] text-[#8C7E72]">
+          Connecting local food donors, shelters, and volunteers to reduce hunger and waste.
         </p>
       </footer>
     </div>
@@ -246,19 +233,19 @@ function PermissionDenied({ requiredRole, userRole, setActiveTab }) {
 
   return (
     <div className="max-w-md mx-auto my-12 text-center">
-      <div className="glass-panel p-8 rounded-3xl border border-rose-500/30 bg-rose-500/5 space-y-4 shadow-xl">
-        <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+      <div className="glass-panel p-8 rounded-lg border border-[#E3D9C8] bg-white space-y-4">
+        <div className="w-12 h-12 rounded-lg bg-[#F9EED9] text-[#8A5816] flex items-center justify-center mx-auto border border-[#E8D1A7]">
           <ShieldAlert className="w-6 h-6" />
         </div>
-        <h2 className="text-xl font-bold text-white">You do not have permission</h2>
-        <p className="text-xs text-slate-300 leading-relaxed">
-          This portal requires the <strong className="text-rose-400 font-semibold">{requiredRole}</strong> role.
-          Your current authenticated account has the role <strong className="text-amber-300 font-semibold font-mono">{userRole}</strong>.
+        <h2 className="text-xl font-heading text-[#2B2118]">You don't have permission to view this page</h2>
+        <p className="text-xs text-[#6B5E52] leading-relaxed">
+          This portal requires the <strong className="text-[#2B2118] font-semibold">{requiredRole}</strong> role.
+          Your current account is registered as <strong className="text-[#4B6B36] font-semibold">{userRole}</strong>.
         </p>
         <div className="pt-2">
           <button
             onClick={redirectRoleTab}
-            className="px-5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 hover:text-white hover:bg-slate-800 text-xs font-semibold transition-all"
+            className="btn-primary text-xs"
           >
             Go to your allowed dashboard ({userRole})
           </button>

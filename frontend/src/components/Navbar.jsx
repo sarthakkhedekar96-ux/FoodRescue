@@ -1,5 +1,5 @@
 import React from 'react';
-import { Utensils, Heart, Truck, LayoutDashboard, Database, Home as HomeIcon, LogIn, LogOut, User, ShieldCheck } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar({ activeTab, setActiveTab }) {
@@ -12,94 +12,92 @@ export default function Navbar({ activeTab, setActiveTab }) {
 
   // Build nav items dynamically based on role
   const navItems = [
-    { id: 'home', label: 'Home', icon: HomeIcon, show: true },
-    { id: 'donor', label: 'Donor Dashboard', icon: Utensils, show: isAuthenticated && (user?.role === 'DONOR' || user?.role === 'ADMIN') },
-    { id: 'ngo', label: 'NGO Dashboard', icon: Heart, show: isAuthenticated && (user?.role === 'NGO' || user?.role === 'ADMIN') },
-    { id: 'volunteer', label: 'Volunteer', icon: Truck, show: isAuthenticated && (user?.role === 'VOLUNTEER' || user?.role === 'ADMIN') },
-    { id: 'admin', label: 'Admin Analytics', icon: LayoutDashboard, show: isAuthenticated && user?.role === 'ADMIN' },
-    { id: 'insights', label: 'Database Insights', icon: Database, show: isAuthenticated && user?.role === 'ADMIN' },
+    { id: 'home', label: 'Home', show: true },
+    { id: 'donor', label: 'Donor Dashboard', show: isAuthenticated && (user?.role === 'DONOR' || user?.role === 'ADMIN') },
+    { id: 'ngo', label: 'NGO Dashboard', show: isAuthenticated && (user?.role === 'NGO' || user?.role === 'ADMIN') },
+    { id: 'volunteer', label: 'Volunteer', show: isAuthenticated && (user?.role === 'VOLUNTEER' || user?.role === 'ADMIN') },
+    { id: 'admin', label: 'Admin Analytics', show: isAuthenticated && user?.role === 'ADMIN' },
+    { id: 'insights', label: 'Database Insights', show: isAuthenticated && user?.role === 'ADMIN' },
   ];
 
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-slate-800">
+    <header className="sticky top-0 z-50 bg-[#FBF6EC] border-b border-[#E3D9C8] m-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
-          {/* Logo & Project Title */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('home')}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Utensils className="w-6 h-6 text-slate-950 font-bold" />
-            </div>
-            <div>
-              <span className="text-xl font-extrabold bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-                FoodRescue
-              </span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                JWT Auth
-              </span>
-            </div>
+          {/* Simple Wordmark */}
+          <div 
+            className="flex items-center space-x-2 cursor-pointer select-none" 
+            onClick={() => setActiveTab('home')}
+            data-testid="navbar-brand"
+          >
+            <span className="text-2xl font-normal font-heading text-[#2B2118] tracking-wide">
+              Food<span className="text-[#B23A25]">Rescue</span>
+            </span>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="flex items-center space-x-1 sm:space-x-2">
+          {/* Plain Text Navigation Links */}
+          <nav className="flex items-center space-x-1 sm:space-x-4">
             {navItems.filter(item => item.show).map((item) => {
-              const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+                  data-testid={`nav-link-${item.id}`}
+                  className={`px-3 py-1.5 text-sm font-medium transition-colors border-b-2 ${
                     isActive
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-md shadow-emerald-500/10'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                      ? 'border-[#B23A25] text-[#B23A25] font-semibold'
+                      : 'border-transparent text-[#6B5E52] hover:text-[#2B2118]'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
-                  <span className="hidden md:inline">{item.label}</span>
+                  {item.label}
                 </button>
               );
             })}
           </nav>
 
           {/* Auth Controls */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-2">
-                <div className="hidden sm:flex items-center space-x-2 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800">
-                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">
-                    {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-semibold text-white leading-tight truncate max-w-[120px]">{user?.name}</p>
-                    <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider">{user?.role}</span>
-                  </div>
+              <div className="flex items-center space-x-3">
+                <div className="hidden sm:flex items-center space-x-2 text-xs">
+                  <span className="text-[#2B2118] font-medium">{user?.name}</span>
+                  <span 
+                    className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#F5EEDB] text-[#4B6B36] border border-[#E3D9C8] uppercase tracking-wide"
+                    data-testid="navbar-user-role"
+                  >
+                    {user?.role}
+                  </span>
                 </div>
 
                 <button
                   onClick={handleLogout}
                   title="Sign Out"
-                  className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all flex items-center space-x-1 text-xs"
+                  data-testid="navbar-logout-btn"
+                  className="px-3 py-1.5 rounded-md border border-[#E3D9C8] text-[#6B5E52] hover:text-[#B23A25] hover:border-[#DCBDBB] text-xs font-medium transition-colors flex items-center space-x-1 bg-white"
                 >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Logout</span>
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Sign Out</span>
                 </button>
               </div>
             ) : (
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setActiveTab('login')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  data-testid="navbar-login-btn"
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
                     activeTab === 'login'
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                      ? 'text-[#B23A25] font-bold'
+                      : 'text-[#6B5E52] hover:text-[#2B2118]'
                   }`}
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => setActiveTab('register')}
-                  className="px-3.5 py-1.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400 transition-all shadow-md shadow-emerald-500/20"
+                  data-testid="navbar-register-btn"
+                  className="btn-primary text-xs px-3.5 py-1.5"
                 >
                   Register
                 </button>

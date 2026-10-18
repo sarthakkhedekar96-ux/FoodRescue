@@ -2,25 +2,205 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Theme A: Harvest Market (Farmers' Market) */
+  --color-bg: #FBF6EC;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F5EEDB;
+  --color-surface-hover: #FAF3E5;
+  --color-border: #E3D9C8;
+  --color-border-subtle: #EFE6D7;
+  --color-border-hover: #D5C8B4;
+  
+  --color-text: #2B2118;
+  --color-text-muted: #6B5E52;
+  --color-text-subtle: #8C7E72;
+  
+  /* Primary: Tomato Red (Buttons, Links) - WCAG AA compliant on #FFFFFF and #FBF6EC */
+  --color-primary: #B23A25;
+  --color-primary-hover: #962F1D;
+  --color-primary-light: #FBF0ED;
+  --color-primary-text: #FFFFFF;
+
+  /* Secondary / Accent: Leaf Green */
+  --color-secondary: #4B6B36;
+  --color-secondary-hover: #3D572C;
+  --color-secondary-light: #EFF5EB;
+
+  /* Status Badges: Muted Solid Colors */
+  --color-status-available-bg: #E5EEDD;
+  --color-status-available-text: #3D572C;
+  --color-status-available-border: #C6D8B8;
+
+  --color-status-reserved-bg: #F9EED9;
+  --color-status-reserved-text: #8A5816;
+  --color-status-reserved-border: #E8D1A7;
+
+  --color-status-picked-bg: #F8E7E3;
+  --color-status-picked-text: #963826;
+  --color-status-picked-border: #E8C1B7;
+
+  --color-status-delivered-bg: #E2EBDC;
+  --color-status-delivered-text: #375225;
+  --color-status-delivered-border: #BFD4B3;
+
+  --color-status-expired-bg: #F4E5E4;
+  --color-status-expired-text: #842E28;
+  --color-status-expired-border: #DCBDBB;
+
+  /* Radius: 6-8px across components */
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+
+  /* Spacing Scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Typography */
+  --font-heading: 'Young Serif', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
 @layer base {
-  body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+  
+  /* Serif headings: unweighted, positive letter-spacing so characters breathe */
+  h1, h2, h3, .font-heading {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+  
   code, pre {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
+  }
+
+  /* Override Chrome's blue autofill tint to preserve theme colors */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+    -webkit-text-fill-color: #2B2118 !important;
+    caret-color: #2B2118 !important;
+    transition: background-color 5000s ease-in-out 0s;
   }
 }
 
-/* Glassmorphism utility */
+/* Flat design: No gradients, no glows, no glassmorphism */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: none;
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.glass-card:hover {
+  border-color: var(--color-border-hover);
+}
+
+/* Primary Button: Tomato Red */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  box-shadow: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+/* Secondary Button: Clean Flat Cream/Border */
+.btn-secondary {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  box-shadow: none;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-hover);
+}
+
+/* Secondary Outline Button: Leaf Green */
+.btn-leaf {
+  background-color: var(--color-secondary);
+  color: #FFFFFF;
+  border: 1px solid var(--color-secondary);
+  border-radius: var(--radius);
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  transition: background-color 0.15s ease;
+  box-shadow: none;
+}
+
+.btn-leaf:hover {
+  background-color: var(--color-secondary-hover);
+  border-color: var(--color-secondary-hover);
+}
+
+/* Solid Muted Status Badges */
+.badge-available {
+  background-color: var(--color-status-available-bg);
+  color: var(--color-status-available-text);
+  border: 1px solid var(--color-status-available-border);
+}
+
+.badge-reserved {
+  background-color: var(--color-status-reserved-bg);
+  color: var(--color-status-reserved-text);
+  border: 1px solid var(--color-status-reserved-border);
+}
+
+.badge-picked {
+  background-color: var(--color-status-picked-bg);
+  color: var(--color-status-picked-text);
+  border: 1px solid var(--color-status-picked-border);
+}
+
+.badge-delivered {
+  background-color: var(--color-status-delivered-bg);
+  color: var(--color-status-delivered-text);
+  border: 1px solid var(--color-status-delivered-border);
+}
+
+.badge-expired {
+  background-color: var(--color-status-expired-bg);
+  color: var(--color-status-expired-text);
+  border: 1px solid var(--color-status-expired-border);
 }
